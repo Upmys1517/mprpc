@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+
+package fixbug;//声明代码所在的包
+
+//定义下面的选项，表示生成service服务类和rpc方法描述，默认不生成
+option cc_generic_services = true;
+
+message Result{
+    int32 errcode = 1;
+    bytes errmsg = 2;
+}
+
+//定义登录请求消息类型
+message LoginRequest {
+    bytes username = 1;//用户名
+    bytes password = 2;//密码
+}
+
+//定义登录响应消息类型
+message LoginResponse {
+    Result result = 1;
+    bool success = 2;//登录是否成功
+}
+
+
+message User{
+    bytes name = 1;
+    uint32 age = 2;
+    enum Sex{
+        male = 0;
+        female = 1;
+    }
+    Sex sex = 3;
+}
+
+
+message GetFriendListsRequest{
+    uint32 userid = 1;
+}
+
+message GetFriendListsResponse{
+    Result result = 1;
+    repeated User friend_list = 2;
+}
+
+//在protobuf中怎么样定义描述rpc方法的类型，我们可以使用service来定义
+service UserServiceRpc{
+    rpc Login(LoginRequest) returns(LoginResponse);
+    rpc GetFriendLists(GetFriendListsRequest) returns(GetFriendListsResponse);
+}
