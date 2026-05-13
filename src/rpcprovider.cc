@@ -1,5 +1,6 @@
 #include "rpcprovider.h"
 #include "rpcheader.pb.h"
+#include <chrono>
 
 void RpcProvider::NotifyService(google::protobuf::Service *service) {
     ServiceInfo service_info;
@@ -90,6 +91,8 @@ void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
 void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn
                     , muduo::net::Buffer* buffer
                     , muduo::Timestamp receiveTime) {
+    auto t_start = std::chrono::high_resolution_clock::now();
+
     //网络上接收的远程rpc调用请求的字符流  Login args
     std::string recv_buf = buffer->retrieveAllAsString();
 
@@ -111,30 +114,18 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn
         args_size = rpc_header.args_size();
     }else{
         //数据头反序列化失败了，记录日志，关闭连接
-        //std::cout << "rpc_header_str: " << rpc_header_str << " parse error!" << std::endl;
         LOG_ERR("rpc_header_str: %s parse error!", rpc_header_str.c_str());
 
         conn->shutdown();
         return;
     }
-    
+
     //获取rpc请求参数的原始字符流，根据args_size反序列化出rpc请求参数的具体内容
     std::string args_str = recv_buf.substr(4 + header_size, args_size);
-
-    //打印调试信息
-    std::cout << "========================================" << std::endl;
-    std::cout << "header_size: " << header_size << std::endl;
-    std::cout << "rpc_header_str: " << rpc_header_str << std::endl;
-    std::cout << "service_name: " << service_name << std::endl;
-    std::cout << "method_name: " << method_name << std::endl;
-    std::cout << "args_size: " << args_size << std::endl;
-    std::cout << "args_str: " << args_str << std::endl;
-    std::cout << "========================================" << std::endl;
 
     //获取service对象和method对象
     auto it = m_serviceMap.find(service_name);
     if(it == m_serviceMap.end()) {
-        //std::cout << service_name << "is not exist!" << std::endl;
         LOG_ERR("%s is not exist!", service_name.c_str());
         conn->shutdown();
         return;
@@ -143,7 +134,6 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn
 
     auto mit = it->second.m_methodMap.find(method_name);
     if(mit == it->second.m_methodMap.end()) {
-        //std::cout << method_name << "is not exist!" << std::endl;
         LOG_ERR("%s is not exist!", method_name.c_str());
         conn->shutdown();
         return;
@@ -154,32 +144,63 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn
     //生成rpc方法调用的请求request和响应response参数
     google::protobuf::Message* request = service->GetRequestPrototype(method).New();
     if(!request->ParseFromString(args_str)) {
-        //std::cout << "request parse error! content: " << args_str << std::endl;
         LOG_ERR("request parse error! content: %s",  args_str.c_str());
         conn->shutdown();
         return;
     }
     google::protobuf::Message* response = service->GetResponsePrototype(method).New();
 
+    auto t_after_parse = std::chrono::high_resolution_clock::now();
+    int64_t parse_us = std::chrono::duration_cast<std::chrono::microseconds>(t_after_parse - t_start).count();
+    int64_t t_start_us = std::chrono::duration_cast<std::chrono::microseconds>(
+        t_start.time_since_epoch()).count();
+
+    //将计时数据存入map，key为连接名，SendRpcResponse中取出计算耗时
+    {
+        std::lock_guard<std::mutex> lock(m_timingMutex);
+        m_timingMap[conn->name()] = {t_start_us, parse_us};
+    }
+
     //给下面的method方法的调用，绑定一个Closure回调函数
-    //这个回调函数会在method方法执行完成以后被调用，执行完成以后就会调用conn->send()把响应结果写回给rpc的调用方
-    google::protobuf::Closure* done = google::protobuf::NewCallback<RpcProvider, 
-                                                                    const muduo::net::TcpConnectionPtr&, 
-                                                                    google::protobuf::Message*>(this, 
-                                                                                                &RpcProvider::SendRpcResponse, 
+    google::protobuf::Closure* done = google::protobuf::NewCallback<RpcProvider,
+                                                                    const muduo::net::TcpConnectionPtr&,
+                                                                    google::protobuf::Message*>(this,
+                                                                                                &RpcProvider::SendRpcResponse,
                                                                                                 conn, response);
 
     service->CallMethod(method, nullptr, request, response, done);
 }
 
 void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn, google::protobuf::Message* response) {
+    //从timingMap取出onMessage记录的起始时间和解析耗时
+    int64_t t_start_us = 0;
+    int64_t parse_us = 0;
+    {
+        std::lock_guard<std::mutex> lock(m_timingMutex);
+        auto it = m_timingMap.find(conn->name());
+        if (it != m_timingMap.end()) {
+            t_start_us = it->second.first;
+            parse_us = it->second.second;
+            m_timingMap.erase(it);
+        }
+    }
+
+    auto t_before_serialize = std::chrono::high_resolution_clock::now();
+
     std::string response_str;
     if(response->SerializeToString(&response_str)) {
         //把rpc方法执行的结果发送回rpc的调用方
         conn->send(response_str);
     }else{
-        //std::cout << "response serialize error!" << std::endl;
         LOG_ERR("response serialize error!");
     }
+
+    auto t_end = std::chrono::high_resolution_clock::now();
+    int64_t response_us = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_before_serialize).count();
+    int64_t process_us = std::chrono::duration_cast<std::chrono::microseconds>(t_before_serialize.time_since_epoch()).count() - t_start_us - parse_us;
+    int64_t total_us = std::chrono::duration_cast<std::chrono::microseconds>(t_end.time_since_epoch()).count() - t_start_us;
+
+    LOG_INFO("[PERF] parse=%ldus process=%ldus response=%ldus total=%ldus", parse_us, process_us, response_us, total_us);
+
     conn->shutdown();//模拟http的短链接服务，由rpcprovider主动断开连接
 }

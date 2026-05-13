@@ -155,6 +155,19 @@ consumer/fast:
 	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/build
 .PHONY : consumer/fast
 
+#=============================================================================
+# Target rules for targets named benchmark
+
+# Build rule for target.
+benchmark: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmark
+.PHONY : benchmark
+
+# fast build rule for target.
+benchmark/fast:
+	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/build
+.PHONY : benchmark/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -163,6 +176,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... benchmark"
 	@echo "... consumer"
 	@echo "... mprpc"
 	@echo "... provider"

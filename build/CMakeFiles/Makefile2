@@ -115,6 +115,7 @@ example/callee/clean: example/callee/CMakeFiles/provider.dir/clean
 
 # Recursive "all" directory target.
 example/caller/all: example/caller/CMakeFiles/consumer.dir/all
+example/caller/all: example/caller/CMakeFiles/benchmark.dir/all
 .PHONY : example/caller/all
 
 # Recursive "preinstall" directory target.
@@ -123,6 +124,7 @@ example/caller/preinstall:
 
 # Recursive "clean" directory target.
 example/caller/clean: example/caller/CMakeFiles/consumer.dir/clean
+example/caller/clean: example/caller/CMakeFiles/benchmark.dir/clean
 .PHONY : example/caller/clean
 
 #=============================================================================
@@ -147,7 +149,7 @@ src/clean: src/CMakeFiles/mprpc.dir/clean
 src/CMakeFiles/mprpc.dir/all:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/mprpc.dir/build.make src/CMakeFiles/mprpc.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/mprpc.dir/build.make src/CMakeFiles/mprpc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=4,5,6,7,8,9,10,11,12 "Built target mprpc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=7,8,9,10,11,12,13,14,15 "Built target mprpc"
 .PHONY : src/CMakeFiles/mprpc.dir/all
 
 # Build rule for subdir invocation for target.
@@ -173,7 +175,7 @@ src/CMakeFiles/mprpc.dir/clean:
 example/callee/CMakeFiles/provider.dir/all: src/CMakeFiles/mprpc.dir/all
 	$(MAKE) $(MAKESILENT) -f example/callee/CMakeFiles/provider.dir/build.make example/callee/CMakeFiles/provider.dir/depend
 	$(MAKE) $(MAKESILENT) -f example/callee/CMakeFiles/provider.dir/build.make example/callee/CMakeFiles/provider.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=13,14,15 "Built target provider"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=16,17,18 "Built target provider"
 .PHONY : example/callee/CMakeFiles/provider.dir/all
 
 # Build rule for subdir invocation for target.
@@ -199,7 +201,7 @@ example/callee/CMakeFiles/provider.dir/clean:
 example/caller/CMakeFiles/consumer.dir/all: src/CMakeFiles/mprpc.dir/all
 	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/depend
 	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=1,2,3 "Built target consumer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=4,5,6 "Built target consumer"
 .PHONY : example/caller/CMakeFiles/consumer.dir/all
 
 # Build rule for subdir invocation for target.
@@ -217,6 +219,32 @@ consumer: example/caller/CMakeFiles/consumer.dir/rule
 example/caller/CMakeFiles/consumer.dir/clean:
 	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/clean
 .PHONY : example/caller/CMakeFiles/consumer.dir/clean
+
+#=============================================================================
+# Target rules for target example/caller/CMakeFiles/benchmark.dir
+
+# All Build rule for target.
+example/caller/CMakeFiles/benchmark.dir/all: src/CMakeFiles/mprpc.dir/all
+	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/depend
+	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/upmys/projects/mprpc/build/CMakeFiles --progress-num=1,2,3 "Built target benchmark"
+.PHONY : example/caller/CMakeFiles/benchmark.dir/all
+
+# Build rule for subdir invocation for target.
+example/caller/CMakeFiles/benchmark.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/upmys/projects/mprpc/build/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 example/caller/CMakeFiles/benchmark.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/upmys/projects/mprpc/build/CMakeFiles 0
+.PHONY : example/caller/CMakeFiles/benchmark.dir/rule
+
+# Convenience name for target.
+benchmark: example/caller/CMakeFiles/benchmark.dir/rule
+.PHONY : benchmark
+
+# clean rule for target.
+example/caller/CMakeFiles/benchmark.dir/clean:
+	$(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/clean
+.PHONY : example/caller/CMakeFiles/benchmark.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

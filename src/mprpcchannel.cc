@@ -60,15 +60,6 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     send_rpc_str += rpc_header_str;
     send_rpc_str += args_str;
 
-        //打印调试信息
-    std::cout << "========================================" << std::endl;
-    std::cout << "header_size: " << header_size << std::endl;
-    std::cout << "rpc_header_str: " << rpc_header_str << std::endl;
-    std::cout << "service_name: " << service_name << std::endl;
-    std::cout << "method_name: " << method_name << std::endl;
-    std::cout << "args_size: " << args_size << std::endl;
-    std::cout << "args_str: " << args_str << std::endl;
-    std::cout << "========================================" << std::endl;
 
     //读取配置文件rpcserver信息
     // std::string ip = MprpcApplication::Getinstance().GetConfig().Load("rpcserverip");

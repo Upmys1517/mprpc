@@ -13,6 +13,8 @@
 #include <string>
 #include <functional>
 #include <unordered_map>
+#include <mutex>
+#include <map>
 
 
 
@@ -50,4 +52,8 @@ private:
     
     //Closure的回调操作，用于序列化rpc的响应和网络发送
     void SendRpcResponse(const muduo::net::TcpConnectionPtr& conn, google::protobuf::Message* response);
+
+    //性能计时: 记录每次请求的起始时间戳和解析耗时, key为连接名
+    std::mutex m_timingMutex;
+    std::map<std::string, std::pair<int64_t, int64_t>> m_timingMap;
 };

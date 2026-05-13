@@ -130,12 +130,27 @@ consumer/fast:
 	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/build
 .PHONY : consumer/fast
 
+# Convenience name for target.
+example/caller/CMakeFiles/benchmark.dir/rule:
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 example/caller/CMakeFiles/benchmark.dir/rule
+.PHONY : example/caller/CMakeFiles/benchmark.dir/rule
+
+# Convenience name for target.
+benchmark: example/caller/CMakeFiles/benchmark.dir/rule
+.PHONY : benchmark
+
+# fast build rule for target.
+benchmark/fast:
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/build
+.PHONY : benchmark/fast
+
 __/user.pb.o: __/user.pb.cc.o
 .PHONY : __/user.pb.o
 
 # target to build an object file
 __/user.pb.cc.o:
 	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/__/user.pb.cc.o
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/__/user.pb.cc.o
 .PHONY : __/user.pb.cc.o
 
 __/user.pb.i: __/user.pb.cc.i
@@ -144,6 +159,7 @@ __/user.pb.i: __/user.pb.cc.i
 # target to preprocess a source file
 __/user.pb.cc.i:
 	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/__/user.pb.cc.i
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/__/user.pb.cc.i
 .PHONY : __/user.pb.cc.i
 
 __/user.pb.s: __/user.pb.cc.s
@@ -152,7 +168,32 @@ __/user.pb.s: __/user.pb.cc.s
 # target to generate assembly for a file
 __/user.pb.cc.s:
 	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/consumer.dir/build.make example/caller/CMakeFiles/consumer.dir/__/user.pb.cc.s
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/__/user.pb.cc.s
 .PHONY : __/user.pb.cc.s
+
+benchmark.o: benchmark.cc.o
+.PHONY : benchmark.o
+
+# target to build an object file
+benchmark.cc.o:
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/benchmark.cc.o
+.PHONY : benchmark.cc.o
+
+benchmark.i: benchmark.cc.i
+.PHONY : benchmark.i
+
+# target to preprocess a source file
+benchmark.cc.i:
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/benchmark.cc.i
+.PHONY : benchmark.cc.i
+
+benchmark.s: benchmark.cc.s
+.PHONY : benchmark.s
+
+# target to generate assembly for a file
+benchmark.cc.s:
+	cd /home/upmys/projects/mprpc/build && $(MAKE) $(MAKESILENT) -f example/caller/CMakeFiles/benchmark.dir/build.make example/caller/CMakeFiles/benchmark.dir/benchmark.cc.s
+.PHONY : benchmark.cc.s
 
 calleruserservice.o: calleruserservice.cc.o
 .PHONY : calleruserservice.o
@@ -186,10 +227,14 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... benchmark"
 	@echo "... consumer"
 	@echo "... __/user.pb.o"
 	@echo "... __/user.pb.i"
 	@echo "... __/user.pb.s"
+	@echo "... benchmark.o"
+	@echo "... benchmark.i"
+	@echo "... benchmark.s"
 	@echo "... calleruserservice.o"
 	@echo "... calleruserservice.i"
 	@echo "... calleruserservice.s"
