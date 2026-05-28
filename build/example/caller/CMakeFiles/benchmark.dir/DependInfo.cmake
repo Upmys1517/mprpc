@@ -12,12 +12,9 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/upmys/projects/mprpc/example/caller/benchmark.cc" "example/caller/CMakeFiles/benchmark.dir/benchmark.cc.o" "gcc" "example/caller/CMakeFiles/benchmark.dir/benchmark.cc.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/upmys/projects/mprpc/build/src/CMakeFiles/mprpc.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.
