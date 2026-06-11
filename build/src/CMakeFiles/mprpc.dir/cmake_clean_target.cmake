@@ -1,3 +1,3 @@
 file(REMOVE_RECURSE
-  "../../lib/libmprpc.a"
+  "/home/upmys/projects/mprpc/lib/libmprpc.a"
 )

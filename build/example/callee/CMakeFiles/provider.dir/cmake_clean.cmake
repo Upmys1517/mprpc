@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../../../bin/provider"
-  "../../../bin/provider.pdb"
+  "/home/upmys/projects/mprpc/bin/provider"
+  "/home/upmys/projects/mprpc/bin/provider.pdb"
   "CMakeFiles/provider.dir/__/user.pb.cc.o"
   "CMakeFiles/provider.dir/__/user.pb.cc.o.d"
   "CMakeFiles/provider.dir/userservice.cc.o"

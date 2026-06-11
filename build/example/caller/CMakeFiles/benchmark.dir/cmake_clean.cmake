@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "../../../bin/benchmark"
-  "../../../bin/benchmark.pdb"
+  "/home/upmys/projects/mprpc/bin/benchmark"
+  "/home/upmys/projects/mprpc/bin/benchmark.pdb"
   "CMakeFiles/benchmark.dir/__/user.pb.cc.o"
   "CMakeFiles/benchmark.dir/__/user.pb.cc.o.d"
   "CMakeFiles/benchmark.dir/benchmark.cc.o"
