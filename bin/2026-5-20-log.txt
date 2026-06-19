@@ -1,3 +1,0 @@
-23:29:59 => [info]service_name: UserServiceRpc
-23:29:59 => [info]method_name: Login
-23:29:59 => [info]method_name: Register

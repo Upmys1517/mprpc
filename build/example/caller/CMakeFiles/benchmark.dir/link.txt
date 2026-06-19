@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -rdynamic CMakeFiles/benchmark.dir/benchmark.cc.o CMakeFiles/benchmark.dir/__/user.pb.cc.o -o /home/upmys/projects/mprpc/bin/benchmark   -L/home/upmys/projects/mprpc/lib  -Wl,-rpath,/home/upmys/projects/mprpc/lib /home/upmys/projects/mprpc/lib/libmprpc.a -lprotobuf -lpthread -lmuduo_net -lmuduo_base -lzookeeper_mt -lpthread 

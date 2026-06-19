@@ -1,9 +1,0 @@
-14:13:23 => [info]service_name: UserServiceRpc
-14:13:23 => [info]method_name: Login
-14:13:23 => [info]method_name: Register
-14:13:23 => [info]zookerrper_init success!
-14:13:23 => [info]znode create success... path: /UserServiceRpc/Register
-14:13:23 => [info]znode create success... path: /UserServiceRpc/Login
-14:13:23 => [info]RpcProvider start service at 127.0.0.1 : 8000
-14:13:46 => [info]zookerrper_init success!
-14:13:46 => [info]zookerrper_init success!
