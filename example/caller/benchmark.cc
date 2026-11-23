@@ -64,7 +64,7 @@ void workerThread(const BenchmarkConfig& cfg, int thread_id) {
     }
 }
 
-void printStats() {
+void printStats(double wall_sec) {
     if (g_all_metrics.empty()) {
         std::cout << "No successful requests to report." << std::endl;
         return;
@@ -90,13 +90,16 @@ void printStats() {
         return latencies[idx];
     };
 
+    //吞吐要按墙钟时间算：多线程并发时，把各线程延迟相加当总耗时会把 QPS 算低
     double total_sec = static_cast<double>(total_us) / 1e6;
-    double qps = static_cast<double>(n) / total_sec;
+    double latency_sum_sec = total_sec;
+    double qps = wall_sec > 0.0 ? static_cast<double>(n) / wall_sec : 0.0;
 
     std::cout << std::endl;
     std::cout << "========== Benchmark Results ==========" << std::endl;
     std::cout << "Successful requests: " << n << std::endl;
-    std::cout << "Total time:           " << std::fixed << std::setprecision(3) << total_sec << " s" << std::endl;
+    std::cout << "Wall-clock time:      " << std::fixed << std::setprecision(3) << wall_sec << " s" << std::endl;
+    std::cout << "Latency sum:          " << std::fixed << std::setprecision(3) << latency_sum_sec << " s" << std::endl;
     std::cout << "Throughput (QPS):     " << std::fixed << std::setprecision(1) << qps << std::endl;
     std::cout << "----------------------------------------" << std::endl;
     std::cout << "End-to-End Latency (microseconds):" << std::endl;
@@ -181,7 +184,7 @@ int main(int argc, char** argv) {
 
     std::cout << "Wall-clock time: " << std::fixed << std::setprecision(3) << wall_sec << " s" << std::endl;
 
-    printStats();
+    printStats(wall_sec);
 
     // 使用 _Exit 避免 Logger 守护线程在静态析构时阻塞退出
     std::cout << std::flush;

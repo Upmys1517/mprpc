@@ -1,6 +1,7 @@
 #include "rpcprovider.h"
 #include "rpcheader.pb.h"
 #include <chrono>
+#include <cstring>
 
 void RpcProvider::NotifyService(google::protobuf::Service *service) {
     ServiceInfo service_info;
@@ -91,53 +92,57 @@ void RpcProvider::onConnection(const muduo::net::TcpConnectionPtr& conn) {
 void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn
                     , muduo::net::Buffer* buffer
                     , muduo::Timestamp receiveTime) {
-    auto t_start = std::chrono::high_resolution_clock::now();
+    //长连接下，一次读事件里可能是一个完整请求、半个请求，也可能是多个请求粘在一起：
+    //按 header_size + args_size 切帧，凑不满就等下一次读事件
+    while (true) {
+        const size_t readable = buffer->readableBytes();
+        if (readable < 4) {
+            return;
+        }
 
-    //网络上接收的远程rpc调用请求的字符流  Login args
-    std::string recv_buf = buffer->retrieveAllAsString();
+        //从字符流中读取前4个字节的内容，换成一个int_t类型的整数，整数的值就是rpc请求头的长度
+        uint32_t header_size = 0;
+        memcpy(&header_size, buffer->peek(), 4);
+        if (readable < 4 + static_cast<size_t>(header_size)) {
+            return;
+        }
 
-    //从字符流中读取前4个字节的内容，换成一个int_t类型的整数，整数的值就是rpc请求头的长度
-    uint32_t header_size = 0;
-    recv_buf.copy((char*)&header_size, 4, 0);
+        //根据header_size读取数据头的原始字符流，反序列化数据头，获取rpc请求的详细信息
+        std::string rpc_header_str(buffer->peek() + 4, header_size);
+        mprpc::RpcHeader rpc_header;
+        if (!rpc_header.ParseFromString(rpc_header_str)) {
+            LOG_ERR("rpc_header_str: %s parse error!", rpc_header_str.c_str());
+            conn->shutdown();
+            return;
+        }
 
-    //根据header_size读取数据头的原始字符流，反序列化数据头，获取rpc请求的详细信息
-    std::string rpc_header_str = recv_buf.substr(4, header_size);
-    mprpc::RpcHeader rpc_header;
+        const std::string service_name = rpc_header.service_name();
+        const std::string method_name  = rpc_header.method_name();
+        const uint32_t    args_size    = rpc_header.args_size();
+        if (readable < 4 + static_cast<size_t>(header_size) + args_size) {
+            return;   // 请求体还没到齐
+        }
 
-    std::string service_name;
-    std::string method_name;
-    uint32_t args_size = 0;
-    if(rpc_header.ParseFromString(rpc_header_str)) {
-        //数据头反序列化成功了，获取服务名字，方法名字和参数的长度
-        service_name = rpc_header.service_name();
-        method_name = rpc_header.method_name();
-        args_size = rpc_header.args_size();
-    }else{
-        //数据头反序列化失败了，记录日志，关闭连接
-        LOG_ERR("rpc_header_str: %s parse error!", rpc_header_str.c_str());
+        std::string args_str(buffer->peek() + 4 + header_size, args_size);
+        buffer->retrieve(4 + header_size + args_size);
 
-        conn->shutdown();
-        return;
-    }
+        auto t_start = std::chrono::high_resolution_clock::now();
 
-    //获取rpc请求参数的原始字符流，根据args_size反序列化出rpc请求参数的具体内容
-    std::string args_str = recv_buf.substr(4 + header_size, args_size);
+        //获取service对象和method对象
+        auto it = m_serviceMap.find(service_name);
+        if(it == m_serviceMap.end()) {
+            LOG_ERR("%s is not exist!", service_name.c_str());
+            conn->shutdown();
+            return;
+        }
+        google::protobuf::Service* service = it->second.m_service;//获取service对象 (new UserService)
 
-    //获取service对象和method对象
-    auto it = m_serviceMap.find(service_name);
-    if(it == m_serviceMap.end()) {
-        LOG_ERR("%s is not exist!", service_name.c_str());
-        conn->shutdown();
-        return;
-    }
-    google::protobuf::Service* service = it->second.m_service;//获取service对象 (new UserService)
-
-    auto mit = it->second.m_methodMap.find(method_name);
-    if(mit == it->second.m_methodMap.end()) {
-        LOG_ERR("%s is not exist!", method_name.c_str());
-        conn->shutdown();
-        return;
-    }
+        auto mit = it->second.m_methodMap.find(method_name);
+        if(mit == it->second.m_methodMap.end()) {
+            LOG_ERR("%s is not exist!", method_name.c_str());
+            conn->shutdown();
+            return;
+        }
 
     const google::protobuf::MethodDescriptor* method = mit->second;//获取method对象 (Login)
 
@@ -169,6 +174,7 @@ void RpcProvider::onMessage(const muduo::net::TcpConnectionPtr& conn
                                                                                                 conn, response);
 
     service->CallMethod(method, nullptr, request, response, done);
+    }
 }
 
 void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn, google::protobuf::Message* response) {
@@ -189,8 +195,14 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn, goog
 
     std::string response_str;
     if(response->SerializeToString(&response_str)) {
-        //把rpc方法执行的结果发送回rpc的调用方
-        conn->send(response_str);
+        //把rpc方法执行的结果发送回rpc的调用方：4 字节长度前缀 + 响应体，
+        //长连接下客户端据此精确读满一条响应
+        uint32_t resp_size = static_cast<uint32_t>(response_str.size());
+        std::string frame;
+        frame.reserve(4 + response_str.size());
+        frame.append(reinterpret_cast<const char*>(&resp_size), 4);
+        frame += response_str;
+        conn->send(frame);
     }else{
         LOG_ERR("response serialize error!");
     }
@@ -202,5 +214,6 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr& conn, goog
 
     LOG_INFO("[PERF] parse=%ldus process=%ldus response=%ldus total=%ldus", parse_us, process_us, response_us, total_us);
 
-    conn->shutdown();//模拟http的短链接服务，由rpcprovider主动断开连接
+    delete response;   // 响应已经发出去，回收
+    //长连接不再主动断开：连接留在连接池里给下一次调用复用
 }
