@@ -15,6 +15,12 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/src/include)
 include_directories(${PROJECT_SOURCE_DIR}/example)
 
+#允许指定非系统安装的 protobuf：cmake -DPROTOBUF_ROOT=/path/to/protobuf
+if(PROTOBUF_ROOT)
+    include_directories(${PROTOBUF_ROOT}/include)
+    link_directories(${PROTOBUF_ROOT}/lib)
+endif()
+
 #设置项目库文件搜索路径 -L
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 

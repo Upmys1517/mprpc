@@ -1,0 +1,36 @@
+### t=1
+  Threads:       1
+  Total requests: 200
+Wall-clock time: 1.565 s
+Successful requests: 200
+Throughput (QPS):     127.9
+  min:  6774 us
+  avg:  7817.8 us
+  max:  51764 us
+  p50:  7116 us
+  p95:  10580 us
+  p99:  19167 us
+### t=4
+  Threads:       4
+  Total requests: 800
+Wall-clock time: 2.831 s
+Successful requests: 800
+Throughput (QPS):     71.0
+  min:  7119 us
+  avg:  14088.7 us
+  max:  49090 us
+  p50:  13587 us
+  p95:  19622 us
+  p99:  34948 us
+### t=8
+  Threads:       8
+  Total requests: 1600
+Wall-clock time: 5.601 s
+Successful requests: 1600
+Throughput (QPS):     35.8
+  min:  7721 us
+  avg:  27914.3 us
+  max:  132782 us
+  p50:  26398 us
+  p95:  33144 us
+  p99:  35308 us
