@@ -1,0 +1,239 @@
+# host: 10-21-143-82  kernel: 5.15.0-60-generic
+# cpu: Intel(R) Xeon(R) Silver 4114 CPU @ 2.20GHz  vcpu: 16
+# date: 2026-11-24 20:49:19 +0800
+# config: rpcserverip=10.8.164.50 rpcserverport=28000 zookeeperip=10.8.164.50 
+### threads=1 n=5000 run=1
+Wall-clock time: 7.733 s
+Successful requests: 5000
+Wall-clock time:      7.733 s
+Throughput (QPS):     646.6
+  min:  1388 us
+  avg:  1540.2 us
+  max:  22925 us
+  p50:  1510 us
+  p95:  1667 us
+  p99:  2012 us
+### threads=1 n=5000 run=2
+Wall-clock time: 7.588 s
+Successful requests: 5000
+Wall-clock time:      7.588 s
+Throughput (QPS):     658.9
+  min:  1371 us
+  avg:  1511.4 us
+  max:  14340 us
+  p50:  1491 us
+  p95:  1634 us
+  p99:  1970 us
+### threads=1 n=5000 run=3
+Wall-clock time: 7.695 s
+Successful requests: 5000
+Wall-clock time:      7.695 s
+Throughput (QPS):     649.8
+  min:  1405 us
+  avg:  1532.4 us
+  max:  15927 us
+  p50:  1506 us
+  p95:  1641 us
+  p99:  2003 us
+### threads=4 n=5000 run=1
+Wall-clock time: 7.606 s
+Successful requests: 20000
+Wall-clock time:      7.606 s
+Throughput (QPS):     2629.4
+  min:  1358 us
+  avg:  1513.3 us
+  max:  19728 us
+  p50:  1482 us
+  p95:  1651 us
+  p99:  2078 us
+### threads=4 n=5000 run=2
+Wall-clock time: 7.630 s
+Successful requests: 20000
+Wall-clock time:      7.630 s
+Throughput (QPS):     2621.2
+  min:  1359 us
+  avg:  1513.2 us
+  max:  19765 us
+  p50:  1481 us
+  p95:  1646 us
+  p99:  2097 us
+### threads=4 n=5000 run=3
+Wall-clock time: 7.729 s
+Successful requests: 20000
+Wall-clock time:      7.729 s
+Throughput (QPS):     2587.6
+  min:  1379 us
+  avg:  1534.7 us
+  max:  30277 us
+  p50:  1493 us
+  p95:  1699 us
+  p99:  2225 us
+### threads=8 n=5000 run=1
+Wall-clock time: 7.666 s
+Successful requests: 40000
+Wall-clock time:      7.666 s
+Throughput (QPS):     5218.1
+  min:  1344 us
+  avg:  1522.7 us
+  max:  35046 us
+  p50:  1476 us
+  p95:  1745 us
+  p99:  2055 us
+### threads=8 n=5000 run=2
+Wall-clock time: 7.641 s
+Successful requests: 40000
+Wall-clock time:      7.641 s
+Throughput (QPS):     5234.9
+  min:  1347 us
+  avg:  1519.6 us
+  max:  27446 us
+  p50:  1474 us
+  p95:  1691 us
+  p99:  2282 us
+### threads=8 n=5000 run=3
+Wall-clock time: 8.119 s
+Successful requests: 40000
+Wall-clock time:      8.119 s
+Throughput (QPS):     4926.7
+  min:  1348 us
+  avg:  1598.9 us
+  max:  27768 us
+  p50:  1486 us
+  p95:  2300 us
+  p99:  3351 us
+### threads=16 n=5000 run=1
+Wall-clock time: 8.206 s
+Successful requests: 80000
+Wall-clock time:      8.206 s
+Throughput (QPS):     9748.5
+  min:  1346 us
+  avg:  1618.2 us
+  max:  46308 us
+  p50:  1514 us
+  p95:  2067 us
+  p99:  3345 us
+### threads=16 n=5000 run=2
+Wall-clock time: 7.664 s
+Successful requests: 80000
+Wall-clock time:      7.664 s
+Throughput (QPS):     10438.1
+  min:  1341 us
+  avg:  1521.7 us
+  max:  48710 us
+  p50:  1472 us
+  p95:  1728 us
+  p99:  2322 us
+### threads=16 n=5000 run=3
+Wall-clock time: 7.663 s
+Successful requests: 80000
+Wall-clock time:      7.663 s
+Throughput (QPS):     10439.8
+  min:  1349 us
+  avg:  1520.4 us
+  max:  41474 us
+  p50:  1476 us
+  p95:  1701 us
+  p99:  2259 us
+### threads=32 n=5000 run=1
+Wall-clock time: 8.314 s
+Successful requests: 160000
+Wall-clock time:      8.314 s
+Throughput (QPS):     19244.6
+  min:  1342 us
+  avg:  1640.8 us
+  max:  72975 us
+  p50:  1536 us
+  p95:  2075 us
+  p99:  3329 us
+### threads=32 n=5000 run=2
+Wall-clock time: 8.333 s
+Successful requests: 160000
+Wall-clock time:      8.333 s
+Throughput (QPS):     19201.3
+  min:  1341 us
+  avg:  1645.2 us
+  max:  77809 us
+  p50:  1538 us
+  p95:  2144 us
+  p99:  3437 us
+### threads=32 n=5000 run=3
+Wall-clock time: 8.525 s
+Successful requests: 160000
+Wall-clock time:      8.525 s
+Throughput (QPS):     18767.5
+  min:  1336 us
+  avg:  1676.1 us
+  max:  76250 us
+  p50:  1545 us
+  p95:  2367 us
+  p99:  3718 us
+# host: 10-21-143-82  kernel: 5.15.0-60-generic
+# cpu: Intel(R) Xeon(R) Silver 4114 CPU @ 2.20GHz  vcpu: 16
+# date: 2026-11-24 20:51:43 +0800
+# config: rpcserverip=10.8.164.50 rpcserverport=28000 zookeeperip=10.8.164.50 
+### threads=64 n=2000 run=1
+Wall-clock time: 3.371 s
+Successful requests: 128000
+Wall-clock time:      3.371 s
+Throughput (QPS):     37968.4
+  min:  1342 us
+  avg:  1642.5 us
+  max:  122746 us
+  p50:  1561 us
+  p95:  1912 us
+  p99:  2484 us
+### threads=64 n=2000 run=2
+Wall-clock time: 3.432 s
+Successful requests: 128000
+Wall-clock time:      3.432 s
+Throughput (QPS):     37291.5
+  min:  1348 us
+  avg:  1670.2 us
+  max:  135520 us
+  p50:  1580 us
+  p95:  1947 us
+  p99:  2605 us
+### threads=64 n=2000 run=3
+Wall-clock time: 3.473 s
+Successful requests: 128000
+Wall-clock time:      3.473 s
+Throughput (QPS):     36855.1
+  min:  1344 us
+  avg:  1682.8 us
+  max:  138157 us
+  p50:  1580 us
+  p95:  1985 us
+  p99:  2929 us
+### threads=128 n=2000 run=1
+Wall-clock time: 5.120 s
+Successful requests: 256000
+Wall-clock time:      5.120 s
+Throughput (QPS):     49995.4
+  min:  1348 us
+  avg:  2286.2 us
+  max:  472713 us
+  p50:  1879 us
+  p95:  4039 us
+  p99:  6958 us
+### threads=128 n=2000 run=2
+Wall-clock time: 4.498 s
+Successful requests: 256000
+Wall-clock time:      4.498 s
+Throughput (QPS):     56912.2
+  min:  1356 us
+  avg:  2138.9 us
+  max:  273803 us
+  p50:  1842 us
+  p95:  3498 us
+  p99:  5420 us
+### threads=128 n=2000 run=3
+Wall-clock time: 4.402 s
+Successful requests: 256000
+Wall-clock time:      4.402 s
+Throughput (QPS):     58154.9
+  min:  1359 us
+  avg:  2077.0 us
+  max:  290525 us
+  p50:  1810 us
+  p95:  3180 us
+  p99:  5140 us
