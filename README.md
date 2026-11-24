@@ -114,11 +114,25 @@ ZooKeeper 会话与 TCP 连接上，服务端处理本身只有约 50 µs。
 原始输出见 `benchmark/results/before-conn-reuse.txt` 与
 `benchmark/results/after-conn-reuse.txt`。
 
+## 服务注册
+
+provider 启动时为每个方法注册临时节点 `/<Service>/<Method>`，内容为 `ip:port`。
+节点已存在时按归属处理：
+
+| 情况 | 处理 |
+|---|---|
+| 节点归属当前会话 | 已注册，幂等返回 |
+| 归属其它会话，地址与本进程相同 | 上一次运行遗留（进程被 kill 后会话 30 s 内未超时）。provider 注册前已 bind 该端口，旧进程不可能仍在监听，带版本号删除后重建 |
+| 归属其它会话，地址不同 | 另一个在线 provider 占用了该方法，拒绝注册，provider 退出 |
+| 同名永久节点 | 无法注册临时节点，provider 退出 |
+
+exists / create / delete 之间与会话超时或其它客户端并发时，按 `ZNODEEXISTS` /
+`ZNONODE` / `ZBADVERSION` 重新检查，最多 5 次。
+
 ## 已知限制
 
 - 连接池按进程共享，连接在单次调用期间被一个线程独占，暂不支持多路复用（协议没有
   request id，无法在一条连接上并发发多个请求）；
 - 连接空闲被对端关闭时依赖调用失败后的重连重试，没有心跳保活；
 - 服务地址缓存没有失效机制，provider 迁移地址后需要重启客户端；
-- `RpcProvider` 注册 znode 时未检查返回值，若上次 provider 的临时节点尚未过期，
-  本次注册会静默失败。
+- 每个方法只登记一个 provider 地址，同一方法的多实例负载均衡尚未支持。
