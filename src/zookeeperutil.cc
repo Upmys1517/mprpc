@@ -1,5 +1,6 @@
 #include "zookeeperutil.h"
 #include "mprpcapplication.h"
+#include <cstring>
 #include <iostream>
 // #include <mutex>
 // #include <condition_variable>
@@ -69,21 +70,101 @@ void ZkClient::Start() {
     LOG_INFO("zookerrper_init success!");
 }
 
-void ZkClient::Create(const char *path, const char *data, int datalen, int state) {
-    char path_buffer[128];
-    int bufferlen = sizeof(path_buffer);
-    int flag = zoo_exists(m_zhandle, path, 0, nullptr);
+namespace {
 
-    if(flag == ZNONODE) {//ZNONODE表示结点不存在
-        //创建结点
-        flag = zoo_create(m_zhandle, path, data, datalen, &ZOO_OPEN_ACL_UNSAFE, state, path_buffer, bufferlen);
-        if(flag == ZOK) {//ZOK表示创建成功
-            LOG_INFO("znode create success... path: %s", path);
-        } else {
-            LOG_ERR("znode create error! flag: %d, path: %s", flag, path);
-            exit(EXIT_FAILURE);
-        }
+//znode 里存的是 "ip:port" 加若干补齐的 '\0'，只比较第一个 '\0' 之前的部分
+bool sameNodeData(const char* a, int alen, const char* b, int blen) {
+    if (a == nullptr || b == nullptr || alen < 0 || blen < 0) {
+        return false;
     }
+    return std::string(a, strnlen(a, alen)) == std::string(b, strnlen(b, blen));
+}
+
+} // namespace
+
+/*
+节点已存在时不能直接当作注册成功：
+- 永久节点（如 /UserServiceRpc）：已存在即可复用；
+- 临时节点归属当前会话：本进程已经注册过，幂等返回；
+- 临时节点归属其它会话、但地址与本进程相同：是上一次运行留下的节点，旧会话还没超时。
+  RpcProvider 在注册前已经 bind 了这个端口，说明旧进程已不在监听，删掉旧节点后重建，
+  否则旧会话超时后节点被 zookeeper 回收，本服务就从注册中心消失了；
+- 临时节点归属其它会话、地址不同：另一个在线 provider 占用了这个方法，拒绝注册。
+exists / create / delete 之间可能和旧会话超时或其它客户端并发，冲突时重新检查。
+*/
+bool ZkClient::Create(const char *path, const char *data, int datalen, int state) {
+    constexpr int kMaxAttempts = 5;
+
+    for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
+        struct Stat stat;
+        int rc = zoo_exists(m_zhandle, path, 0, &stat);
+
+        if (rc == ZNONODE) {//ZNONODE表示结点不存在，创建结点
+            char path_buffer[128];
+            rc = zoo_create(m_zhandle, path, data, datalen, &ZOO_OPEN_ACL_UNSAFE, state,
+                            path_buffer, sizeof(path_buffer));
+            if (rc == ZOK) {
+                LOG_INFO("znode create success... path: %s", path);
+                return true;
+            }
+            if (rc == ZNODEEXISTS) {
+                continue;   // exists 和 create 之间被别人抢先创建，重新检查归属
+            }
+            LOG_ERR("znode create error! rc: %d (%s), path: %s", rc, zerror(rc), path);
+            return false;
+        }
+
+        if (rc != ZOK) {
+            LOG_ERR("znode exists error! rc: %d (%s), path: %s", rc, zerror(rc), path);
+            return false;
+        }
+
+        //节点已存在
+        if ((state & ZOO_EPHEMERAL) == 0) {
+            return true;
+        }
+
+        const clientid_t* self = zoo_client_id(m_zhandle);
+        if (self != nullptr && stat.ephemeralOwner == self->client_id) {
+            return true;
+        }
+
+        if (stat.ephemeralOwner == 0) {
+            LOG_ERR("znode %s already exists as a persistent node, cannot register ephemeral node", path);
+            return false;
+        }
+
+        char existing[256];
+        int existing_len = sizeof(existing);
+        rc = zoo_get(m_zhandle, path, 0, existing, &existing_len, &stat);
+        if (rc == ZNONODE) {
+            continue;   // 旧会话恰好超时，节点已被回收
+        }
+        if (rc != ZOK) {
+            LOG_ERR("znode get error! rc: %d (%s), path: %s", rc, zerror(rc), path);
+            return false;
+        }
+
+        if (!sameNodeData(existing, existing_len, data, datalen)) {
+            LOG_ERR("znode %s is owned by another live session 0x%llx (data: %.*s), refuse to register",
+                    path, static_cast<unsigned long long>(stat.ephemeralOwner),
+                    static_cast<int>(strnlen(existing, existing_len)), existing);
+            return false;
+        }
+
+        LOG_INFO("znode %s is a stale node of session 0x%llx, delete and recreate",
+                 path, static_cast<unsigned long long>(stat.ephemeralOwner));
+        //带版本号删除：期间节点被改过就返回 ZBADVERSION，重新检查而不是误删
+        rc = zoo_delete(m_zhandle, path, stat.version);
+        if (rc == ZOK || rc == ZNONODE || rc == ZBADVERSION) {
+            continue;
+        }
+        LOG_ERR("znode delete error! rc: %d (%s), path: %s", rc, zerror(rc), path);
+        return false;
+    }
+
+    LOG_ERR("znode create error! path: %s, still conflicting after %d attempts", path, kMaxAttempts);
+    return false;
 }
 
 std::string ZkClient::GetData(const char *path) {

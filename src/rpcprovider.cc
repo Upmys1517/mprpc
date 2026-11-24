@@ -1,6 +1,7 @@
 #include "rpcprovider.h"
 #include "rpcheader.pb.h"
 #include <chrono>
+#include <cstdio>
 #include <cstring>
 
 void RpcProvider::NotifyService(google::protobuf::Service *service) {
@@ -55,14 +56,24 @@ void RpcProvider::Run() {
     for(const auto& sp : m_serviceMap) {
         // /server_name eg: /UserServiceRpc
         std::string service_path = "/" + sp.first;
-        zkCli.Create(service_path.c_str(), nullptr, 0);
+        if (!zkCli.Create(service_path.c_str(), nullptr, 0)) {
+            //日志是异步写线程，exit 前不一定落盘，致命错误同步打到 stderr
+            LOG_ERR("register service %s failed, provider exit", service_path.c_str());
+            fprintf(stderr, "register service %s to zookeeper failed, provider exit\n", service_path.c_str());
+            exit(EXIT_FAILURE);
+        }
         for(const auto& mp : sp.second.m_methodMap) {
             // /service_name/method_name  eg: /UserServiceRpc/Login 存储当前这个rpc服务节点的主机ip port
             std::string method_path = service_path + "/" + mp.first;
             char method_path_data[128] = { 0 };
             sprintf(method_path_data, "%s:%d", ip.c_str(), port);
             // ZOO_EPHEMERAL表示znode是一个临时性结点
-            zkCli.Create(method_path.c_str(), method_path_data, sizeof(method_path_data), ZOO_EPHEMERAL);
+            //注册失败时服务对客户端不可见，继续运行只会让调用方一直报"服务不存在"，直接退出
+            if (!zkCli.Create(method_path.c_str(), method_path_data, sizeof(method_path_data), ZOO_EPHEMERAL)) {
+                LOG_ERR("register method %s failed, provider exit", method_path.c_str());
+                fprintf(stderr, "register method %s to zookeeper failed, provider exit\n", method_path.c_str());
+                exit(EXIT_FAILURE);
+            }
         }
     }
 
