@@ -30,6 +30,9 @@ private:
     //归还连接：channel 析构时把连接放回进程级连接池，下次调用直接复用
     void releaseConnection();
 
+    //丢弃连接：收发或解析失败后连接状态不可信，直接关闭，不放回池里
+    void discardConnection();
+
     int m_clientfd = -1;
     std::string m_ip;
     uint16_t m_port = 0;

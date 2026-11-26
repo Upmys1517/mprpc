@@ -17,7 +17,7 @@ src/
   mprpccontroller.*    RpcController 实现
   rpcprovider.*        服务端：服务注册、消息分发、响应
   zookeeperutil.*      ZooKeeper 客户端封装
-  logger.* / lockqueue.h   异步日志（无锁队列 + 独立写线程）
+  logger.* / lockqueue.h   异步日志（互斥锁 + 条件变量的阻塞队列，独立写线程）
 example/
   callee/              服务提供方示例
   caller/              调用方示例 + benchmark 压测客户端
