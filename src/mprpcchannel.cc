@@ -150,6 +150,14 @@ void MprpcChannel::releaseConnection() {
     m_clientfd = -1;
 }
 
+void MprpcChannel::discardConnection() {
+    if (m_clientfd < 0) {
+        return;
+    }
+    ::close(m_clientfd);
+    m_clientfd = -1;
+}
+
 bool MprpcChannel::resolveEndpoint(const std::string& method_path,
                                    std::string& ip,
                                    uint16_t& port) {
@@ -248,7 +256,7 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
 
         if (!sendAll(m_clientfd, send_rpc_str.data(), send_rpc_str.size())) {
             err_text = "send error!";
-            releaseConnection();      // 不把坏连接放回池里
+            discardConnection();      // 不把坏连接放回池里
             if (attempt + 1 < kMaxAttempts) {
                 continue;
             }
@@ -260,7 +268,7 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
         if (!recvExact(m_clientfd, reinterpret_cast<char*>(&resp_size), 4)
                 || resp_size == 0) {
             err_text = "recv response size error!";
-            releaseConnection();
+            discardConnection();
             if (attempt + 1 < kMaxAttempts) {
                 continue;
             }
@@ -271,7 +279,7 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
         std::string response_str(resp_size, '\0');
         if (!recvExact(m_clientfd, &response_str[0], resp_size)) {
             err_text = "recv response body error!";
-            releaseConnection();
+            discardConnection();
             if (attempt + 1 < kMaxAttempts) {
                 continue;
             }
@@ -281,7 +289,7 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
 
         if (!response->ParseFromString(response_str)) {
             controller->SetFailed("parse error! response_str: " + response_str);
-            releaseConnection();
+            discardConnection();
             return;
         }
 
